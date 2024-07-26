@@ -32,9 +32,28 @@ function App() {
       console.log("data", data);
       return data;
     },
+    onMutate: async (newTitles) => {
+      await queryClient.cancelQueries({ queryKey: ["titles"] });
+      const previousTitles = queryClient.getQueryData(["titles"]);
+
+      if (previousTitles) {
+        queryClient.setQueryData(["titles"], (old: any) => {
+          console.log("old", [...old, newTitles]);
+          const record = { ...old[0], title: newTitles };
+          return [...old, record];
+        });
+      }
+      console.log("new", previousTitles, newTitles);
+
+      return { previousTitles };
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["titles"] });
+    },
+
     onSuccess: () => {
       // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ["titles"] });
+      // queryClient.invalidateQueries({ queryKey: ["titles"] });
     },
   });
 
@@ -55,18 +74,18 @@ function App() {
 
   const client = generateClient<Schema>();
   const { signOut } = useAuthenticator((context) => [context.user]);
-  const [posts, setPosts] = useState<Schema["Post"]["type"][]>();
+  // const [posts, setPosts] = useState<Schema["Post"]["type"][]>();
   const [post, setPost] = useState("");
 
-  const getAllData = useCallback(async () => {
-    const { data: allPosts } = await client.models.Post.list();
+  // const getAllData = useCallback(async () => {
+  //   const { data: allPosts } = await client.models.Post.list();
 
-    setPosts(allPosts);
-  }, [client.models.Post]);
+  //   setPosts(allPosts);
+  // }, [client.models.Post]);
 
-  useEffect(() => {
-    getAllData();
-  }, [getAllData]);
+  // useEffect(() => {
+  //   getAllData();
+  // }, [getAllData]);
 
   async function onAddTitle(form: FormEvent<HTMLFormElement>) {
     form.preventDefault();
