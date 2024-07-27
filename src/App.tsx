@@ -7,7 +7,7 @@ import {
   View,
 } from "@aws-amplify/ui-react";
 import Post from "./components/Post";
-import { useEffect, useState, useCallback, FormEvent } from "react";
+import { useState, FormEvent } from "react";
 import { generateClient } from "aws-amplify/api";
 import { Schema } from "../amplify/data/resource";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -37,11 +37,14 @@ function App() {
       const previousTitles = queryClient.getQueryData(["titles"]);
 
       if (previousTitles) {
-        queryClient.setQueryData(["titles"], (old: any) => {
-          console.log("old", [...old, newTitles]);
-          const record = { ...old[0], title: newTitles };
-          return [...old, record];
-        });
+        queryClient.setQueryData(
+          ["titles"],
+          (old: Schema["Post"]["type"][]) => {
+            console.log("old", [...old, newTitles]);
+            const record = { ...old[0], title: newTitles };
+            return [...old, record];
+          }
+        );
       }
       console.log("new", previousTitles, newTitles);
 
