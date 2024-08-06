@@ -11,6 +11,7 @@ import { useState, FormEvent } from "react";
 import { generateClient } from "aws-amplify/api";
 import { Schema } from "../amplify/data/resource";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { v4 as uuidv4 } from "uuid";
 
 function App() {
   const queryClient = useQueryClient();
@@ -19,17 +20,19 @@ function App() {
     queryKey: ["titles"],
     queryFn: async () => {
       const { data: allPosts } = await client.models.Post.list();
+
       return allPosts;
     },
   });
 
   // Mutations
   const mutation = useMutation({
+    mutationKey: ["addTitles"],
     mutationFn: async (title: string) => {
       const { data } = await client.models.Post.create({
         title,
       });
-      console.log("data", data);
+      console.log("data-mutate", data);
       return data;
     },
     onMutate: async (newTitles) => {
@@ -41,7 +44,7 @@ function App() {
           ["titles"],
           (old: Schema["Post"]["type"][]) => {
             console.log("old", [...old, newTitles]);
-            const record = { ...old[0], title: newTitles };
+            const record = { ...old[0], id: uuidv4(), title: newTitles };
             return [...old, record];
           }
         );
@@ -53,21 +56,36 @@ function App() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["titles"] });
     },
-
-    onSuccess: () => {
-      // Invalidate and refetch
-      // queryClient.invalidateQueries({ queryKey: ["titles"] });
-    },
   });
 
   // Mutations
   const deleteMutation = useMutation({
+    mutationKey: ["deleteTitles"],
     mutationFn: async (id: string) => {
       const { data } = await client.models.Post.delete({
         id,
       });
-      console.log("data", data);
+      console.log("data-delete", data);
       return data;
+    },
+    onMutate: async (deletedTitle) => {
+      await queryClient.cancelQueries({ queryKey: ["titles"] });
+      const previousTitles = queryClient.getQueryData(["titles"]);
+
+      if (deletedTitle) {
+        queryClient.setQueryData(
+          ["titles"],
+          (old: Schema["Post"]["type"][]) => {
+            console.log("old", deletedTitle);
+            return old.filter((item) => item.id !== deletedTitle);
+          }
+        );
+      }
+
+      return { previousTitles };
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["titles"] });
     },
     onSuccess: () => {
       // Invalidate and refetch
@@ -77,18 +95,7 @@ function App() {
 
   const client = generateClient<Schema>();
   const { signOut } = useAuthenticator((context) => [context.user]);
-  // const [posts, setPosts] = useState<Schema["Post"]["type"][]>();
   const [post, setPost] = useState("");
-
-  // const getAllData = useCallback(async () => {
-  //   const { data: allPosts } = await client.models.Post.list();
-
-  //   setPosts(allPosts);
-  // }, [client.models.Post]);
-
-  // useEffect(() => {
-  //   getAllData();
-  // }, [getAllData]);
 
   async function onAddTitle(form: FormEvent<HTMLFormElement>) {
     form.preventDefault();
@@ -97,21 +104,11 @@ function App() {
 
     mutation.mutate(title);
 
-    // const { data } = await client.models.Post.create({
-    //   title,
-    // });
-
-    // console.log("data", data);
-    // getAllData();
     setPost("");
   }
 
   async function onDeletePost(id: string) {
-    // const { data } = await client.models.Post.delete({
-    //   id,
-    // });
     deleteMutation.mutate(id);
-    // console.log("data", data);
   }
 
   return (
@@ -135,6 +132,11 @@ function App() {
         <Button type="submit" variation="primary">
           Add Title
         </Button>
+        {mutation.isPaused || deleteMutation.isPaused ? (
+          <View color="red" textAlign="center">
+            You are offline! Data will be sent when online.
+          </View>
+        ) : null}
       </View>
       {query.data?.map((post) => (
         <Post key={post.id} post={post} onDelete={onDeletePost} />
