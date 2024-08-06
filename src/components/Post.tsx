@@ -18,6 +18,7 @@ const Post = ({
         <div className="flex gap-2">
           <div>Title:</div>
           <div>{post.title}</div>
+          <div>{post.id}</div>
         </div>
       </button>
       <input type="hidden" name="id" id="id" value={post.id} />
