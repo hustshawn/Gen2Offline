@@ -8,13 +8,11 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
-// import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { generateClient } from "aws-amplify/api";
 import { Schema } from "../amplify/data/resource.ts";
+import { titleKeys } from "./useTitles.ts";
 
-// const persister = createSyncStoragePersister({
-//   storage: window.localStorage,
-// });
+const { addKey, deleteKey, queryKey } = titleKeys;
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,12 +30,12 @@ const asyncStoragePersister = createAsyncStoragePersister({
   storage: window.localStorage,
 });
 // we need a default mutation function so that paused mutations can resume after a page reload
-queryClient.setMutationDefaults(["addTitles"], {
+queryClient.setMutationDefaults(addKey, {
   mutationFn: async (title) => {
     // to avoid clashes with our optimistic update when an offline mutation continues
 
     console.log("title", title);
-    await queryClient.cancelQueries({ queryKey: ["titles"] });
+    await queryClient.cancelQueries({ queryKey });
     const { data } = await client.models.Post.create({
       title,
     });
@@ -45,11 +43,11 @@ queryClient.setMutationDefaults(["addTitles"], {
   },
 });
 
-queryClient.setMutationDefaults(["deleteTitles"], {
+queryClient.setMutationDefaults(deleteKey, {
   mutationFn: async (id) => {
     // to avoid clashes with our optimistic update when an offline mutation continues
 
-    await queryClient.cancelQueries({ queryKey: ["titles"] });
+    await queryClient.cancelQueries({ queryKey });
     const { data } = await client.models.Post.delete({
       id,
     });
@@ -59,10 +57,8 @@ queryClient.setMutationDefaults(["deleteTitles"], {
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    {/* <QueryClientProvider client={queryClient}> */}
     <PersistQueryClientProvider
       client={queryClient}
-      // persistOptions={{ persister: asyncStoragePersister }}
       persistOptions={{ persister: asyncStoragePersister }}
       onSuccess={() => {
         // resume mutations after initial restore from localStorage was successful
