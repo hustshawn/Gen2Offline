@@ -4,20 +4,6 @@ const schema = a.schema({
   Post: a
     .model({
       title: a.string().required(),
-      comments: a.hasMany("Comment", "postId"),
-      owner: a
-        .string()
-        .authorization((allow) => [allow.owner().to(["read", "delete"])]),
-    })
-    .authorization((allow) => [allow.guest().to(["read"]), allow.owner()]),
-  Comment: a
-    .model({
-      content: a.string().required(),
-      postId: a.id(),
-      post: a.belongsTo("Post", "postId"),
-      owner: a
-        .string()
-        .authorization((allow) => [allow.owner().to(["read", "delete"])]),
     })
     .authorization((allow) => [allow.guest().to(["read"]), allow.owner()]),
 });
