@@ -31,7 +31,6 @@ export const useTitles = ({
     queryKey,
     queryFn: async () => {
       const { data: allPosts } = await client.models.Post.list();
-      console.log("running", allPosts);
       return allPosts;
     },
   });
@@ -45,7 +44,6 @@ export const useTitles = ({
       const { data } = await client.models.Post.create({
         title,
       });
-      console.log("data-mutate", data);
       return data;
     },
     onMutate: async (newTitles) => {
@@ -54,12 +52,10 @@ export const useTitles = ({
 
       if (previousTitles) {
         queryClient.setQueryData(queryKey, (old: Schema["Post"]["type"][]) => {
-          console.log("old", [...old, newTitles]);
           const record = { ...old[0], id: uuidv4(), title: newTitles };
           return [...old, record];
         });
       }
-      console.log("new", previousTitles, newTitles);
 
       return { previousTitles };
     },
@@ -75,7 +71,6 @@ export const useTitles = ({
       const { data } = await client.models.Post.delete({
         id,
       });
-      console.log("data-delete", data);
       return data;
     },
     onMutate: async (deletedTitle) => {
@@ -84,7 +79,6 @@ export const useTitles = ({
 
       if (deletedTitle) {
         queryClient.setQueryData(queryKey, (old: Schema["Post"]["type"][]) => {
-          console.log("old", deletedTitle);
           return old.filter((item) => item.id !== deletedTitle);
         });
       }

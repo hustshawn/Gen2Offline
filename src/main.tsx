@@ -34,7 +34,6 @@ queryClient.setMutationDefaults(addKey, {
   mutationFn: async (title) => {
     // to avoid clashes with our optimistic update when an offline mutation continues
 
-    console.log("title", title);
     await queryClient.cancelQueries({ queryKey });
     const { data } = await client.models.Post.create({
       title,
