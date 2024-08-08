@@ -37,7 +37,7 @@ function App() {
   return (
     <View className="flex flex-col w-1/2 m-auto gap-2">
       <Heading level={2} className="text-3xl text-green-400">
-        Title Adder
+        Add Post Title
       </Heading>
       <View
         as="form"

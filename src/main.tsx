@@ -29,6 +29,7 @@ const client = generateClient<Schema>();
 const asyncStoragePersister = createAsyncStoragePersister({
   storage: window.localStorage,
 });
+
 // we need a default mutation function so that paused mutations can resume after a page reload
 queryClient.setMutationDefaults(addKey, {
   mutationFn: async (title) => {
