@@ -46,6 +46,7 @@ export const useTitles = ({
       });
       return data;
     },
+
     onMutate: async (newTitles) => {
       await queryClient.cancelQueries({ queryKey: queryKey });
       const previousTitles = queryClient.getQueryData(queryKey);
@@ -86,10 +87,6 @@ export const useTitles = ({
       return { previousTitles };
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey });
-    },
-    onSuccess: () => {
-      // Invalidate and refetch
       queryClient.invalidateQueries({ queryKey });
     },
   });
