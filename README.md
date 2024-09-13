@@ -281,8 +281,6 @@ const schema = a.schema({
   Post: a
     .model({
       title: a.string().required(),
-      verbiage: a.ref("Verbiage").required().array(),
-      createdAt: a.datetime(),
     })
     .authorization((allow) => [allow.guest().to(["read"]), allow.owner()]),
 });
