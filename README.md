@@ -278,11 +278,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 
 const schema = a.schema({
-  Verbiage: a
-    .model({
-      name: a.string().required(),
-    })
-    .authorization((allow) => [allow.guest()]),
   Post: a
     .model({
       title: a.string().required(),
