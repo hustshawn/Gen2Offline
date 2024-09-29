@@ -5,7 +5,9 @@ const schema = a.schema({
     .model({
       title: a.string().required(),
     })
-    .authorization((allow) => [allow.guest().to(["read"]), allow.owner()]),
+    .authorization((allow) => [
+      allow.guest().to(["read"]), allow.owner()]
+    ),
 });
 
 export type Schema = ClientSchema<typeof schema>;
@@ -13,10 +15,12 @@ export type Schema = ClientSchema<typeof schema>;
 export const data = defineData({
   schema,
   authorizationModes: {
+    // defaultAuthorizationMode: 'apiKey',
     defaultAuthorizationMode: "userPool",
     // API Key is used for a.allow.public() rules
     apiKeyAuthorizationMode: {
       expiresInDays: 30,
     },
   },
+
 });

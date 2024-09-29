@@ -30,7 +30,7 @@ function App() {
     setPost("");
   }
 
-  async function onDeletePost(id: string) {
+  async function onDeleteTitle(id: string) {
     deleteMutation.mutate(id);
   }
 
@@ -62,7 +62,7 @@ function App() {
         ) : null}
       </View>
       {query.data?.map((post) => (
-        <Post key={post.id} post={post} onDelete={onDeletePost} />
+        <Post key={post.id} post={post} onDelete={onDeleteTitle} />
       ))}
       <Button width="10rem" onClick={signOut} variation="warning">
         Sign Out
